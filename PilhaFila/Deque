@@ -1,1 +1,101 @@
+#include <stdio.h>
+#include <stdlib.h>
 
+#define TAM 100
+
+
+
+struct Fila{
+
+    int front;
+    int rear;
+    int itens[TAM];
+
+};
+
+
+int fila_vazia(struct Fila fila){
+
+    if(fila.rear > fila.front){
+
+        return 1;
+
+    }
+
+    return 0;
+
+
+}
+
+
+int fila_cheia(struct Fila fila){
+
+    if(fila.rear == TAM-1 && fila.front == 0){
+        return 1;
+    }
+
+    return 0;
+
+
+}
+
+
+void insere(struct Fila *fila, int valor){
+
+    if(fila_cheia(fila)){
+        printf("Pilha cheia. Nao eh possivel inserir mais elementos");
+        exit(1);
+    }
+
+    
+
+    if(fila->rear == TAM-1){
+
+        int i,j;
+        
+        for(i = 0, j = fila->front; j <= fila->rear; i++,j++){
+            fila->itens[i] = fila->itens[j];
+        }
+
+        fila->front = 0;
+        fila->rear = --i;
+
+    }
+
+    fila->itens[fila->++rear] = valor;
+
+
+}
+
+
+
+int remove(struct Fila *fila){
+
+    if(fila_vazia(fila)){
+        printf("Pilha vazia!");
+        exit(1);
+    }
+    
+   fila->front++;
+
+   return fila->itens[fila->front-1];
+
+}
+
+int main(){
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    return 0;
+}
