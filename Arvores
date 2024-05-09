@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+
+struct Arvore{
+
+    int num;
+    struct Arvore *direita;
+    struct Arvore *esquerda;
+
+};
+
+typedef struct Arvore arvore;
+
+
+int verifica_vazia(arvore *tree){
+
+    return (tree == NULL);
+
+}
+
+
+void cria_elemento_arvore_vazia(arvore **tree, int num){
+
+    *tree = (arvore*)malloc(sizeof(arvore));
+
+    (*tree)->direita = NULL;
+    (*tree)->esquerda = NULL;
+
+}
+
+
+void cria_elemento(arvore **tree, int num, arvore *dir, arvore *esq)
+
+    arvore *tree = (arvore*)malloc(sizeof(arvore));
+
+    tree->direita = dir;
+    tree->esquerda = esq;
+
+}
+
+
+void showTree(Tree* t){
+
+  printf("<");
+
+  if(!verifica_vazia(t)){
+
+    printf("%d ", t->num);
+    showTree(t->sae);
+    showTree(t->sad);
+
+  }
+
+  printf(">");
+
+}
+
+
+int main(){
+
+    arvore *tree = NULL;
+    arvore *tree2 = NULL;
+    arvore *tree3 = NULL;
+
+    cria_elemento_arvore_vazia(tree2,2);
+    cria_elemento_arvore_vazia(tree3,3);
+
+    cria_elemento(tree,1,tree2,tree3);
+
+    showTree(tree);
+
+
+
+
+
+
+    return 0;
+
+}
