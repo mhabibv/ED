@@ -1,0 +1,262 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+typedef struct No{
+
+    int valor;
+    struct No *esquerda;
+    struct No* direita;
+
+}arvore;
+
+
+arvore* criar(int num){
+
+    // Aloca espaço para o novo nó
+    arvore *nova = (arvore*)malloc(sizeof(arvore));
+    nova->valor = num;
+    nova->esquerda = NULL;  // cria o nó sem filhos (folha)
+    nova->direita = NULL;
+
+    return nova;
+}
+
+arvore* inserir(int num, arvore* esq, arvore* dir){
+
+    arvore* r = (arvore*) malloc(sizeof(arvore));  // aloca espaço para o novo nó
+    r->valor = num;  // atribui o valor do nó
+    r->esquerda = esq;  // atribui o nó da esquerda
+    r->direita = dir; // atribui o nó da direita
+
+    return r; // retorna o novo nó
+}
+
+void imprimir_arvore(arvore* raiz) { // (algoritmo de pre ordem)
+
+    if (raiz != NULL) {     // imprime enquanto nao for nula
+        printf("%d ", raiz->valor); 
+        imprimir_arvore(raiz->esquerda);
+        imprimir_arvore(raiz->direita);
+
+        // vai imprimir primeiro a raiz, depois o nó da esquerda, depois o da direita
+    }
+
+}
+
+
+int contFolhas(arvore *raiz){
+
+    if(raiz == NULL)  // quando o nó for nulo, nao conta
+        return 0;
+
+    else{
+
+        if(raiz->esquerda == NULL && raiz->direita == NULL)  // se nao tiver nó pendurado na esquerda nem na direita, retorna 1 (é uma folha)
+            return 1;
+
+        return contFolhas(raiz->esquerda) + contFolhas(raiz->direita); // retorna a soma dos retornos das chamadas (quando for uma folha ele retorna 1, entao vai somando esses "1", devolvendo o numero total de folhas)
+        
+    }
+}
+
+
+arvore* apagaFolha(arvore *raiz, int num){
+
+    if(raiz == NULL){ // se o nó for nulo, vai retornar nulo (para manter a disposicao original da arvore)
+
+        return NULL;
+
+    }
+
+    if(raiz->esquerda == NULL && raiz->direita == NULL){ // testa se é um folha primeiro
+
+        if(raiz->valor == num){ // se for uma folha, testa se o valor corresponde ao valor que deseja retirar
+            free(raiz); // libera o espaço 
+            return NULL; // retorna null (la na chamada recursiva vai fazer o nó pai deixar de apontar pra ele e começar a apontar pra null)
+        }  
+
+        else{
+
+            return raiz; // se for uma folha mas nao for o valor desejado, retorna o proprio nó (para, na chamada recursiva, o nó pai nao deixar de apontar pra ele)
+        }
+
+    }
+
+    raiz->esquerda = apagaFolha(raiz->esquerda, num); // chama a função novamente para o nó da esquerda e atribui a esquerda do nó atual a esse retorno (se for nulo, vai continuar sendo nulo. se for uma folha e corresponder ao numero que queremos tirar, passa a ser null.)
+    raiz->direita = apagaFolha(raiz->direita, num);  // a mesma coisa, so que para o da direita agora
+
+    return raiz; // retorna o nó
+
+}
+
+
+int saoIguais(arvore* a, arvore* b){ // retorno 1 se forem iguais e 0 se forem diferentes
+
+    if(a == NULL && b == NULL)  // se ambos os nós forem nulos, retorna 1 (sao iguais)
+        return 1;
+    
+    if(a != NULL && b != NULL) // se ambos os nós forem diferente de nulo:
+        return ((a->valor == b->valor) && (saoIguais(a->esquerda,b->esquerda)) && (saoIguais(a->direita,b->direita)));  // retorna 1 se os valores dos nós forem iguais AND o retorno da chamada recursiva para a esquerda de a e a esquerda de b for 1 AND o retorno da chamada recursiva para a direita de a e a direita de b for 1 
+
+    return 0; // se um nó for nulo e o outro nao retorna 0
+
+}
+
+void liberar_arvore(arvore* raiz) {
+    if (raiz != NULL) {
+        liberar_arvore(raiz->esquerda);
+        liberar_arvore(raiz->direita);
+        free(raiz);
+    }
+}
+
+
+int main() {
+
+
+    // TESTES FUNCAO A
+
+    //TESTE A.1.:
+    
+    arvore* Arvore = criar(1);
+    printf("%d \n", contFolhas(Arvore));
+
+    liberar_arvore(Arvore);
+
+    // FIM TESTE A.1
+
+    // TESTE A.2:
+
+    Arvore = NULL;
+
+    arvore* no1 = criar(7);
+    arvore* no2 = criar(5);
+    arvore* no3 = criar(7);
+
+    Arvore = inserir(6,inserir(9,criar(6),inserir(7,no1, NULL)), inserir(5,NULL,inserir(8,no2,no3)));
+    printf("%d \n", contFolhas(Arvore));
+
+    liberar_arvore(Arvore);
+    
+
+
+    // FIM TESTE A.2
+
+    // TESTE A.3:
+
+    no1 = criar(6);
+    no2 = criar(5);
+    no3 = criar(7);
+
+    Arvore = inserir(6,inserir(9,no1,NULL), inserir(7,NULL,inserir(8,no2,no3)));
+    printf("%d \n", contFolhas(Arvore));
+
+    liberar_arvore(Arvore);
+    
+
+    // FIM TESTE A.3
+    //FIM TESTES FUNCAO A
+
+
+    // TESTES FUNCAO B
+
+    //TESTE B.1.:
+
+    
+    Arvore = criar(1);
+    Arvore = apagaFolha(Arvore,1);
+
+    if(Arvore == NULL){
+        printf("arvore vazia\n");
+    }
+    else{
+        imprimir_arvore(Arvore);
+    }
+
+
+    liberar_arvore(Arvore);
+
+    // FIM TESTE B.1
+
+    // TESTE B.2:
+
+    no1 = criar(7);
+    no2 = criar(5);
+    no3 = criar(7);
+
+    Arvore = inserir(6,inserir(9,criar(6),inserir(7,no1, NULL)), inserir(5,NULL,inserir(8,no2,no3)));
+    Arvore = apagaFolha(Arvore,7);
+
+    if(Arvore == NULL){
+        printf("arvore vazia\n");
+    }
+    else{
+        imprimir_arvore(Arvore);
+    }
+    
+    liberar_arvore(Arvore);
+
+    // FIM TESTE B.2
+
+    // TESTE B.3:
+
+    no1 = criar(6);
+    no2 = criar(5);
+    no3 = criar(7);
+
+    Arvore = inserir(6,inserir(9,no1,NULL), inserir(7,NULL,inserir(8,no2,no3)));
+    Arvore = apagaFolha(Arvore,7);
+
+    printf("\n");
+    if(Arvore == NULL){
+        printf("arvore vazia\n");
+    }
+    else{
+        imprimir_arvore(Arvore);
+    }
+    
+    
+
+    // FIM TESTE B.3
+    // FIM TESTES FUNCAO B
+
+    // TESTES FUNCAO C
+
+    //TESTE C.1.:
+    
+    arvore* Arvore2 = inserir(6,inserir(9,criar(6),NULL),inserir(7,inserir(8,NULL,criar(5)),NULL));
+
+    printf("\n");
+    if(saoIguais(Arvore,Arvore2))
+        printf("Verdadeiro");
+    else    
+        printf("Falso");
+
+
+    // FIM TESTE C.1
+
+    //TESTE C.2:
+
+    Arvore = inserir(6,inserir(9,criar(6),NULL),inserir(7,inserir(8,NULL,criar(5)),NULL));
+
+    printf("\n");
+    if(saoIguais(Arvore,Arvore2))
+        printf("Verdadeiro");
+    else    
+        printf("Falso");
+
+
+    liberar_arvore(Arvore);
+    liberar_arvore(Arvore2);
+
+    // FIM TESTE C.2
+    // FIM TESTES FUNCAO C
+
+
+
+ 
+
+    return 0;
+
+}
