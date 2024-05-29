@@ -1,0 +1,190 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct caracs {
+    int freq;
+    char carac;
+} caracs;
+
+
+typedef struct no{
+
+    int freq;
+    char carac;
+    struct no *pai;
+    struct no *esq;
+    struct no *dir;
+
+}no;
+
+typedef struct lista{
+
+    no* No;
+    int freq;
+    struct lista* prox;
+    
+}lista;
+
+
+no* criaNo(int frequencia, char caracter, no *esquerda, no *direita) {
+
+    no *r = (no*)malloc(sizeof(no));
+
+    r->freq = frequencia;
+    r->carac = caracter;
+    r->esq = esquerda;
+    r->dir = direita;
+    r->pai = NULL;
+
+    if (r->esq != NULL)
+        r->esq-> pai = r;
+    if (r->dir != NULL)
+        r->dir-> pai = r;
+
+    return r;
+}
+
+lista* criaLista(no *No) {
+
+    lista* novo = (lista*)malloc(sizeof(lista));
+    novo->No = No;
+    novo->freq = No->freq;
+    novo->prox = NULL;
+
+    return novo;
+}
+
+no* menorFreq(lista **inicio){
+
+    if (*inicio == NULL) 
+        return NULL;
+        
+    lista* primeiro = *inicio;
+    no* menor = primeiro->No;
+
+    *inicio = (*inicio)->prox;
+
+    free(primeiro);
+
+    return menor;
+
+}
+
+void insereNaListaOrdenado(lista** inicio, no *No) {
+
+    lista* novo = criaLista(No);
+    
+    if (*inicio == NULL || (*inicio)->No->freq > novo->No->freq || ((*inicio)->No->freq == novo->No->freq && (*inicio)->No->carac > novo->No->carac)) {
+
+        novo->prox = *inicio;
+        *inicio = novo;
+
+    } 
+
+    else {
+        
+        lista* aux = *inicio;
+        while (aux->prox != NULL && 
+               (aux->prox->No->freq < novo->No->freq || 
+               (aux->prox->No->freq == novo->No->freq && aux->prox->No->carac <= novo->No->carac))) {
+            aux = aux->prox;
+        }
+        novo->prox = aux->prox;
+        aux->prox = novo;
+    }
+}
+
+
+no* criaArvore(caracs vet[], int tam){
+
+    lista* inicio = NULL;
+
+    for (int i = 0; i < tam; i++) {
+
+        if (vet[i].freq > 0) {
+            no* novo = criaNo(vet[i].freq, vet[i].carac, NULL, NULL);
+            insereNaListaOrdenado(&inicio, novo);
+        }
+
+    }
+
+    while (inicio != NULL && inicio->prox != NULL) {
+
+        no* esquerda = menorFreq(&inicio);
+        no* direita = menorFreq(&inicio);
+
+        int somaFreq = esquerda->freq + direita->freq;
+        no* new = criaNo(somaFreq, '\0', esquerda, direita);
+
+        insereNaListaOrdenado(&inicio, new);
+    }
+
+    return menorFreq(&inicio); 
+
+
+}
+
+
+
+void imprimeArvore(no* raiz, char* codigo, int profundidade) {
+
+    if (raiz == NULL) 
+        return;
+
+    if (raiz->esq == NULL && raiz->dir == NULL) {
+
+        codigo[profundidade] = '\0';
+        printf("Caractere: %c, Codigo: %s\n", raiz->carac, codigo);
+
+    } 
+    else {
+
+        codigo[profundidade] = '0';
+        imprimeArvore(raiz->esq, codigo, profundidade + 1);
+        codigo[profundidade] = '1';
+        imprimeArvore(raiz->dir, codigo, profundidade + 1);
+
+    }
+}
+
+int main() {
+
+    caracs str[256];
+    char aux[1000];
+    int tam = 0;
+    int achou = 0;
+
+    for (int i = 0; i < 256; i++) {
+        str[i].freq = 0;
+    }
+
+    fgets(aux, sizeof(aux), stdin);
+
+    for (int i = 0; aux[i] != '\0'; i++) {
+
+        achou = 0;
+
+        for (int j = 0; j < tam; j++) {
+            if (aux[i] == str[j].carac) {
+                str[j].freq++;
+                achou = 1;
+                break;
+            }
+        }
+
+        if (!achou && aux[i] != '\n') {
+            str[tam].carac = aux[i];
+            str[tam].freq = 1;
+            tam++;
+        }
+    }
+
+   
+
+    no* raiz = criaArvore(str, tam);
+
+    char codigo[100];
+    imprimeArvore(raiz, codigo, 0);
+
+    return 0;
+}
